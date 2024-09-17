@@ -24,7 +24,7 @@ class PDFParser:
         # Set up logger
         self.logger = Log(f'{os.path.basename(__file__)}').getlog()
 
-        # Initialize the LlamaParse parser with the API key and options
+        # Initialize the LlamaParse data_processing with the API key and options
         self.parser = LlamaParse(
             api_key=self.parser_api_key,
             result_type="markdown",
@@ -57,6 +57,5 @@ class PDFParser:
                 texts.append(value.text)
             result_dict['pdf_text'] = '\n'.join(texts)
             all_docs.append(result_dict)
-
         return all_docs
 

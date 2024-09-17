@@ -10,6 +10,27 @@ class MissingDBInfoError(VDBException):
 
 class CollectionNotFoundError(VDBException):
     """Exception raised when a specified collection does not exist."""
-    def __init__(self, collection_name):
+    def __init__(self, collection_name: str):
         message = f"Collection '{collection_name}' does not exist. Please create the collection first."
         super().__init__(message)
+
+class ModelNotFoundError(VDBException):
+    """Exception raised when a specified collection does not exist."""
+    def __init__(self, model: str, available_models: list[str]):
+        message = (
+            f"Model '{model}' does not exist. "
+            f"Available models: {', '.join(available_models)}. "
+            "If you want to use a different model, please contact your server administrator."
+        )
+        super().__init__(message)
+
+class ModelLoadingWarning(VDBException):
+    """Exception raised when a specified collection does not exist."""
+    def __init__(self, model: str):
+        if model == 'llama3.1:70b-instruct-q4_0':
+            message = (
+                f"Loading model '{model}' may require a longer response time"
+            )
+            super().__init__(message)
+        else:
+            pass

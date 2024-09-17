@@ -12,7 +12,6 @@ load_dotenv(find_dotenv())
 class MilvusDB:
     # Class-level attributes
     conn = None
-    db_name: str = 'Test'
 
     # Retrieve host and port from environment variables
     host: str = os.getenv('VDB_HOST')
@@ -39,13 +38,17 @@ class MilvusDB:
             else:
                 MilvusDB.conn = connections.connect(host=MilvusDB.host, port=MilvusDB.port)
                 self.logger.info(f"Connected to Vector Database")
-        existing_db = db.list_database()
-        if MilvusDB.db_name not in existing_db:
-            db.create_database(MilvusDB.db_name)
-            self.logger.info(f"Successfully created database: {MilvusDB.db_name}")
+        # existing_db = db.list_database()
+        # if MilvusDB.db_name not in existing_db:
+        #     db.create_database(MilvusDB.db_name)
+        #     self.logger.info(f"Successfully created database: {MilvusDB.db_name}")
 
-        db.using_database(MilvusDB.db_name)
-        self.logger.info(f"Using database: {MilvusDB.db_name}")
+        # db.using_database(MilvusDB.db_name)
+        # if not connections.has_connection(self.db_name):
+        #     connections.connect(alias=self.db_name, host=self.host, port=self.port)
+
+    def load_collection(self, colname):
+        Collection(colname).load()
 
     def is_collection_exists(self, col_name: str):
         """
@@ -99,12 +102,13 @@ class MilvusDB:
                 dtype=DataType.FLOAT_VECTOR,
                 dim=MilvusDB.embed_model.DIM
             )
+
             schema = CollectionSchema(
                 fields=[pdf_id, pdf_name, chunk_number, chunk_text, text_embedding],
                 description="Embed pdf file"
             )
 
-            collection = Collection(colname, schema, using=self.db_name)
+            collection = Collection(colname, schema)
 
             # Create an index for the text_embedding field
             index_params = {
@@ -114,7 +118,7 @@ class MilvusDB:
             }
             collection.create_index(field_name="text_embedding", index_params=index_params)
 
-    def insert_collection(self, colname:str, filename:str, chunk: int, data:list):
+    def insert_collection(self, colname: str, data: list):
         """
         Insert data into the specified collection.
 
@@ -124,42 +128,15 @@ class MilvusDB:
                          Expected keys: 'text', 'pdf_name', 'chunk_number'
         """
 
-        self.logger.info(f"{filename} - {chunk} is being inserted to: " + colname)
+        # self.logger.info(f"{filename} - {chunk} is being inserted to: " + colname)
         col = Collection(colname)
         col.load()
         col.insert(data)
 
-    def search_collection(self, colname: str, query: str, pdf_name: str):
-        """
-        Search the specified collection using the provided query embeddings.
-
-        Args:
-            colname (str): The name of the collection to search.
-            query (list): A list of embedding vectors to use as queries.
-
-        Returns:
-            list: The search results containing the most similar documents.
-        """
-
-        self.logger.info(f'Start searching collection: {colname}')
-        col = Collection(colname)
-        res = col.search(
-            data=query,
-            limit=5,
-            anns_field="text_embedding",
-            param = {
-                "metric_type": "L2", # This parameter value must be identical to the one used in the collection schema
-                "params": {"nprobe": 10}
-            },
-            expr=f"pdf_name == '{pdf_name}'",
-            output_fields=["chunk_text"]
-        )
-        self.logger.info('Done searching')
-        return res
-
     def check_existing_file(self, colname: str, pdf_name: str):
 
         collection = Collection(colname)
+        self.load_collection(colname)
         query_expr = f'pdf_name == "{pdf_name}"'
         search_results = collection.query(expr=query_expr)
         if len(search_results) == 0:
@@ -167,6 +144,10 @@ class MilvusDB:
         else:
             self.logger.info(f'{pdf_name} is already exist in our vector database')
             return True
+
+    def drop_collection(self, colname):
+
+        utility.drop_collection(colname)
 
 class MilvusWLangChain(Milvus):
 
@@ -186,8 +167,7 @@ class MilvusWLangChain(Milvus):
             collection_name=colname,
             connection_args={
                 "host": MilvusDB.host,
-                "port": MilvusDB.port,
-                "db_name": MilvusDB.db_name
+                "port": MilvusDB.port
             },
             vector_field=MilvusDB.VECTOR,
             primary_field=MilvusDB.ID_KEY,
@@ -197,7 +177,7 @@ class MilvusWLangChain(Milvus):
         )
         self.pdf_name = pdf_name
 
-    def get_retriever(self):
+    def get_retriever(self, relavant_chunk_size):
         """
         Configures and returns a retriever with specified filters.
 
@@ -212,7 +192,7 @@ class MilvusWLangChain(Milvus):
             configurable={
                 "expr_filter": {
                     "expr": f"pdf_name == '{self.pdf_name}'",
-                    "k": 8,
+                    "k": relavant_chunk_size,
                 }
             }
         )
@@ -220,7 +200,6 @@ class MilvusWLangChain(Milvus):
 if __name__ == '__main__':
 
     milvusdb = MilvusDB()
-    milvusdb.create_collection('test_1')
-    milvusdb.host
+    milvusdb.drop_collection('col_test')
 
 
