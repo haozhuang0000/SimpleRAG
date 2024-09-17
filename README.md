@@ -55,7 +55,7 @@ LLAMAPARSER_API_KEY=your_llamaparse_api_key
 ```
 ## Usage
 
-1. Put your PDF files under `_static`
+1. Create a folder `_static` & Put your PDF files under `_static`
 2. `python main.py`
 
 ## RAG Workflow
