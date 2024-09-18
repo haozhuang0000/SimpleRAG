@@ -14,7 +14,7 @@ Before setting up SimpleRAG, ensure you have the following:
 
 3. **Environment Requirements:**
    - A machine with Python 3.11 installed.
-   - *(Recommended)* A GPU server for hosting the embedding model.
+   - *(Recommended)* A GPU server for hosting the embedding model & LLM.
 
 ## Installation
 
