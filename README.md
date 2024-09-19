@@ -84,7 +84,7 @@ The Retrieval-Augmented Generation (RAG) process in SimpleRAG follows these step
 
 - **Store in Milvus:** Insert the generated embeddings into the Milvus vector database for future retrieval.
 
-### 3. Query the Vector Database
+### 3. Query the Vector Database and Get a response from LLM
 
 #### 3.1 Embed Query
 
