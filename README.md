@@ -11,9 +11,9 @@ Before setting up SimpleRAG, ensure you have the following:
 
 2. **Milvus Installation:**
    - Follow the official [Milvus installation guide](https://milvus.io/docs/install_standalone-docker.md) to set up a standalone Milvus instance using Docker.
-
+   - Linux and Mac OS is recommended.
 3. **Environment Requirements:**
-   - A machine with Python 3.11 installed.
+   - Anaconda
    - *(Recommended)* A GPU server for hosting the embedding model & LLM.
 
 ## Installation
@@ -58,7 +58,7 @@ LLAMAPARSER_API_KEY=your_llamaparse_api_key
 1. Create a folder `_static` & Put your PDF files under `_static`
 2. `python main.py`
 
-## RAG Workflow
+## SimpleRAG Workflow
 
 The Retrieval-Augmented Generation (RAG) process in SimpleRAG follows these steps:
 
@@ -66,38 +66,38 @@ The Retrieval-Augmented Generation (RAG) process in SimpleRAG follows these step
 
 - **Initialize Collection:** Create a new collection in Milvus to store document embeddings.
 
-### 2. Parse PDF Documents
+### 2. Parse PDF Documents and insert Data into Vector Database
+
+#### 2.1 Parse Documents
 
 - **Process PDFs:** Use LLamaParse to process all PDF files located in the `_static` directory.
 
-### 3. Insert Data into Vector Database
-
-#### 3.1 Split Documents
+#### 2.2 Split Documents
 
 - **Document Chunks:** Break down parsed documents into chunks for processing.
 
-#### 3.2 Embed Chunks
+#### 2.3 Embed Chunks
 
 - **Generate Embeddings:** Use the embedding model to generate embeddings for each document chunk.
 
-#### 3.3 Insert Embeddings
+#### 2.4 Insert Embeddings
 
 - **Store in Milvus:** Insert the generated embeddings into the Milvus vector database for future retrieval.
 
-### 4. Query the Vector Database
+### 3. Query the Vector Database
 
-#### 4.1 Embed Query
+#### 3.1 Embed Query
 
 - **Query Embedding:** Convert the user's query into an embedding using the same embedding model.
 
-#### 4.2 Search Database
+#### 3.2 Search Database
 
 - **Similarity Search:** Perform a similarity search in Milvus to find chunks that are most relevant to the query embedding.
 
-#### 4.3 Retrieve Chunks
+#### 3.3 Retrieve Chunks
 
 - **Fetch Results:** Retrieve the most relevant document chunks based on the similarity search results.
 
-### 5. Generate Response with LLM
+#### 3.4 Generate Response with LLM
 
-- **Contextual Response:** Utilize LangChain to generate a response from the language model, incorporating the retrieved context for an informed answer.
+- **Contextual Response:** Utilize LangChain to generate a response from the language model, incorporating the retrieved context for response.
