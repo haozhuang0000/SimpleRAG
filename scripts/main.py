@@ -1,3 +1,5 @@
+import time
+
 from rag.VDB_Common import *
 from rag.Prompts import FinancialExpertPrompt
 from data_processing.parser import PDFParser
@@ -28,10 +30,6 @@ class SimpleRAG(
         super().__init__()
         self.logger = Log(f'{os.path.basename(__file__)}').getlog()
         self.model = model
-        if self.model == self.WarningModel:
-            warnings.warn(
-                self.WarningModelMSG
-            )
         self.llm = Llm(model=self.model)
         self.QA_CHAIN_PROMPT = self.get_prompt_template()
 
@@ -112,6 +110,13 @@ class SimpleRAG(
         formatted_context = self.format_docs(results)
         self.logger.info('Relevant chunks have been retrieved')
 
+        start_time = time.time()
+        self.logger.info('Generating response from llm...')
+        if self.WarningModel in self.model:
+            warnings.warn(
+                self._warningModelMsg(self.model)
+            )
+
         rag_chain = (
                 {"context": RunnablePassthrough(), "input": RunnablePassthrough()}
                 | self.QA_CHAIN_PROMPT
@@ -120,6 +125,9 @@ class SimpleRAG(
         )
         rag_chain_input = {"context": formatted_context, "input": user_query}
         reply = rag_chain.invoke(rag_chain_input)
+        end_time = time.time()
+        seconds = end_time - start_time
+        self.logger.info(f'It takes: {seconds}s to generate response from {self.model}')
         return reply
 
     def run(self,
@@ -161,7 +169,17 @@ class SimpleRAG(
 
 if __name__ == '__main__':
 
-    simplerag = SimpleRAG('llama3.1:70b-instruct-q4_0')
+    """
+    Available models
+    'gemma:7b',
+    'gemma2:27b',
+    'mistral:latest',
+    'phi3:latest',
+    'llama3.1:8b',
+    'llama3.1:70b',
+    'llama3.1:70b-instruct-q4_0'
+    """
+    simplerag = SimpleRAG('phi3:latest')
     simplerag.run(
         colname='col_test',
         document_path= '../_static',

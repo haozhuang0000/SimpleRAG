@@ -26,6 +26,9 @@ class ModelNotFoundError(VDBException):
 
 class SimpleRagWarning():
 
-    WarningModel = 'llama3.1:70b-instruct-q4_0'
-    WarningModelMSG = f"Loading model '{WarningModel}' may require a longer response time."
+    WarningModel = '70b'
     WarningQueryResult = "It does not retrieve any information from the vector database, please check your collection in vdb!"
+
+    def _warningModelMsg(self, model):
+
+        return f"Using model '{model}' may require a longer response time."
