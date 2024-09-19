@@ -1,4 +1,6 @@
 import os
+import time
+
 from llama_parse import LlamaParse
 from llama_index.core import SimpleDirectoryReader
 from scripts.logger.logger import Log
@@ -42,6 +44,7 @@ class PDFParser:
             Parsed data from all PDF files in the directory.
         """
         self.logger.info(f'Loading all PDF files in directory, path: {directory_path}')
+        current_time = time.time()
         file_extractor = {".pdf": self.parser}
         documents = SimpleDirectoryReader(directory_path, file_extractor=file_extractor, num_files_limit=limit).load_data()
         grouped_documents = defaultdict(list)
@@ -57,5 +60,8 @@ class PDFParser:
                 texts.append(value.text)
             result_dict['pdf_text'] = '\n'.join(texts)
             all_docs.append(result_dict)
+        end_time = time.time()
+        seconds = end_time - current_time
+        self.logger.info(f'It takes: {seconds}s to process files in path: {directory_path}')
         return all_docs
 
